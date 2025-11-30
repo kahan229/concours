@@ -178,20 +178,21 @@
         console.log("===================================");
     
         /* 🚀 ENVOI DANS GOOGLE SHEET */
-        fetch("https://script.google.com/macros/s/AKfycbxm7AQtV5-KsdgyxaXZJ8MGIMZtnXTAZGObMQ5J8WB1c6h-mzRpbRUFSyy0aWRJAMmC/exec", {
-            method: "POST",
-            headers: { 
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify(collectedData)
-        })
-        .then(response => response.text())
-        .then(result => {
-            console.log("🟢 Google Sheets a répondu :", result);
-        })
-        .catch(error => {
-            console.error("🔴 Erreur lors de l'envoi au Google Sheet :", error);
-        });
+        fetch("https://corsproxy.io/?" + encodeURIComponent("https://script.google.com/macros/s/AKfycbxm7AQtV5-KsdgyxaXZJ8MGIMZtnXTAZGObMQ5J8WB1c6h-mzRpbRUFSyy0aWRJAMmC/exec"), {
+    method: "POST",
+    headers: { 
+        "Content-Type": "application/json"
+    },
+    body: JSON.stringify(collectedData)
+})
+.then(response => response.text())
+.then(result => {
+    console.log("🟢 Google Sheets a répondu :", result);
+})
+.catch(error => {
+    console.error("🔴 Erreur lors de l'envoi au Google Sheet :", error);
+});
+
     });
     </script>
     
